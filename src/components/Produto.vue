@@ -59,7 +59,7 @@
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'Produto',
   data () {
     return {
       produto: {
