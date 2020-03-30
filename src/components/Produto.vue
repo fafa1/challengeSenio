@@ -42,7 +42,7 @@
       </el-table-column>
       <el-table-column
         label="Ação">
-        <template scope="scope">
+        <template slot-scope="scope">
           <el-button
             type="primary"
             size="small"
