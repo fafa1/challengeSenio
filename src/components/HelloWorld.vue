@@ -4,7 +4,7 @@
     <el-form :model="produto">
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="Nome">
+          <el-form-item :required="true" label="Nome">
             <el-input v-model="produto.nome"></el-input>
           </el-form-item>
         </el-col>
@@ -18,7 +18,7 @@
             <el-input v-model="produto.categoria"></el-input>
           </el-form-item>
         </el-col>
-        <el-button type="primary" @click="onSubmit">Inserir</el-button>
+        <el-button type="primary" @click="onSubmit">{{nomeButao}}</el-button>
       </el-row>
     </el-form>
 
@@ -62,16 +62,29 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      produto: {},
-      tableData: []
+      produto: {
+        nome: '',
+        preco: '',
+        categoria: ''
+      },
+      tableData: [],
+      indice: '',
+      nomeButao: 'Inserir'
     }
   },
 
   methods: {
-    onSubmit(rowtable,indice) {
-      debugger
+    onSubmit() {
+      if (this.indice !== '') {
+        this.nomeButao = 'Inserir'
+        const rowData = {
+          nome: this.produto.nome,
+          preco: this.produto.preco,
+          categoria: this.produto.categoria
+        }
 
-      if (indice !== '') {
+        this.tableData.splice(this.indice, 1, ...rowData)
+        this.indice = ''
       }
 
       this.tableData.push({
@@ -86,15 +99,12 @@ export default {
       this.produto.nome = nome
       this.produto.preco = preco
       this.produto.categoria = categoria
-
     },
 
     handleEdit(index, row) {
       this.carregarCampos(index,row)
-
-      this.onSubmit(row,indice)
-
-      console.log(row)
+      this.nomeButao = 'Atualizar'
+      this.indice = index
     },
 
     handleRemove(index) {
@@ -104,7 +114,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .principal {
   max-width: 1200px;
