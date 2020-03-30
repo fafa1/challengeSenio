@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h2 class="texto-titulo">PRODUTOS DO ESTOQUE</h2>
     <router-view/>
   </div>
 </template>
@@ -10,6 +11,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+  .texto-titulo {
+    text-align: center;
+  }
 </style>
