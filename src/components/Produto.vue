@@ -1,7 +1,7 @@
 <template>
   <div class="principal">
 
-    <el-form :model="produto">
+    <el-form :model="produto" @keyup.native.enter="onSubmit">
       <el-row :gutter="20">
         <el-col :span="8">
           <el-form-item :required="true" label="Nome">
@@ -22,24 +22,24 @@
       </el-row>
     </el-form>
 
-      <el-table
-        :data="tableData"
-        stripe
-        style="width: 100%">
-      <el-table-column
-        prop="nome"
-        label="Nome"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="preco"
-        label="Preco"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="categoria"
-        label="Categoria">
-      </el-table-column>
+    <el-table
+      :data="tableData"
+      stripe
+      style="width: 100%">
+    <el-table-column
+      prop="Nome"
+      label="Nome"
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="Preco"
+      label="Preco"
+      width="180">
+    </el-table-column>
+    <el-table-column
+      prop="Categoria"
+      label="Categoria">
+    </el-table-column>
       <el-table-column
         label="Ação">
         <template slot-scope="scope">
@@ -58,8 +58,17 @@
 </template>
 
 <script>
+import axios from 'axios'
+
+const url_Base = 'http://localhost:62854/api'
+
 export default {
   name: 'Produto',
+
+  async created() {
+    this.carregarDados()
+  },
+
   data () {
     return {
       produto: {
@@ -68,47 +77,76 @@ export default {
         categoria: ''
       },
       tableData: [],
+      produtos: '',
       indice: '',
       nomeButao: 'Inserir'
     }
   },
 
   methods: {
-    onSubmit() {
+    async onSubmit() {
       if (this.indice !== '') {
         this.nomeButao = 'Inserir'
-        const rowData = {
-          nome: this.produto.nome,
-          preco: this.produto.preco,
-          categoria: this.produto.categoria
+
+        const atualizarProdutos = await axios.put(`${url_Base}/produtos/${this.indice}`, {
+          Nome: this.produto.nome,
+          Preco: this.produto.preco,
+          Categoria: this.produto.categoria
+        })
+
+        if(atualizarProdutos.status === 204) {
+          this.carregarDados()
+          this.configCampos()
         }
 
-        this.tableData.splice(this.indice, 1, ...rowData)
         this.indice = ''
+
+        return
       }
 
-      this.tableData.push({
-        nome: this.produto.nome,
-        preco: this.produto.preco,
-        categoria: this.produto.categoria})
+      // Cadastrar Produto
+      const inserirProdutos = await axios.post(`${url_Base}/produtos`, {
+        Nome: this.produto.nome,
+        Preco: this.produto.preco,
+        Categoria: this.produto.categoria
+      })
+      this.configCampos()
+      if (inserirProdutos.data) {
+        this.carregarDados()
+      }
     },
 
-    carregarCampos(indice, row) {
-      const { categoria, nome, preco } = row
-
+    configCampos(nome = '', preco = '', categoria = '') {
       this.produto.nome = nome
       this.produto.preco = preco
       this.produto.categoria = categoria
     },
 
+    async carregarDados() {
+      this.produtos = await axios.get(`${url_Base}/produtos`)
+      this.tableData = this.produtos.data
+    },
+
+    carregarCampos(indice, row) {
+      const { Categoria, Nome, Preco } = row
+      this.configCampos(Nome, Preco, Categoria)
+    },
+
     handleEdit(index, row) {
       this.carregarCampos(index,row)
       this.nomeButao = 'Atualizar'
-      this.indice = index
+      this.indice = index + 1
     },
 
-    handleRemove(index) {
-      this.tableData.splice(index, 1)
+    async handleRemove(index) {
+      this.produtos = await axios.delete(`${url_Base}/produtos/${index + 1}`)
+      if (this.produtos.status === 204)
+          this.tableData.splice(index, 1)
+    }
+  },
+  watch: {
+    'produto.preco' () {
+      this.produto.preco = this.produto.preco.replace(',', '.')
     }
   },
 }
