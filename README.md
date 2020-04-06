@@ -1,4 +1,4 @@
-# produtos-seniourp
+# Produtos SeniorUp
 
 > A Vue.js project
 
